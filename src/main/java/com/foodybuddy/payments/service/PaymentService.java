@@ -1,0 +1,106 @@
+package com.foodybuddy.payments.service;
+
+import com.foodybuddy.payments.dto.PaymentResponse;
+import com.foodybuddy.payments.dto.ProcessPaymentRequest;
+import com.foodybuddy.payments.entity.Payment;
+import com.foodybuddy.payments.entity.PaymentMethod;
+import com.foodybuddy.payments.entity.PaymentStatus;
+import com.foodybuddy.payments.repository.PaymentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class PaymentService {
+    
+    @Autowired
+    private PaymentRepository paymentRepository;
+    
+    public PaymentResponse processPayment(ProcessPaymentRequest request) {
+        String paymentId = UUID.randomUUID().toString();
+        String transactionId = "TXN_" + System.currentTimeMillis();
+        
+        // Create payment
+        Payment payment = new Payment(
+                paymentId,
+                request.getOrderId(),
+                request.getAmount(),
+                PaymentStatus.PROCESSING,
+                request.getMethod()
+        );
+        
+        payment.setTransactionId(transactionId);
+        
+        // Simulate payment processing
+        try {
+            // In a real application, this would call a payment gateway
+            Thread.sleep(2000); // Simulate processing time
+            
+            // Simulate success/failure (90% success rate)
+            if (Math.random() > 0.1) {
+                payment.setStatus(PaymentStatus.COMPLETED);
+            } else {
+                payment.setStatus(PaymentStatus.FAILED);
+            }
+        } catch (InterruptedException e) {
+            payment.setStatus(PaymentStatus.FAILED);
+        }
+        
+        // Save payment
+        Payment savedPayment = paymentRepository.save(payment);
+        
+        return convertToResponse(savedPayment);
+    }
+    
+    public PaymentResponse getPayment(String paymentId) {
+        Payment payment = paymentRepository.findByPaymentId(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found: " + paymentId));
+        
+        return convertToResponse(payment);
+    }
+    
+    public List<PaymentResponse> getPaymentsByOrderId(String orderId) {
+        return paymentRepository.findByOrderId(orderId).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+    
+    public List<PaymentResponse> getAllPayments() {
+        return paymentRepository.findAll().stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+    
+    public PaymentResponse refundPayment(String paymentId) {
+        Payment payment = paymentRepository.findByPaymentId(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found: " + paymentId));
+        
+        if (payment.getStatus() != PaymentStatus.COMPLETED) {
+            throw new RuntimeException("Only completed payments can be refunded");
+        }
+        
+        payment.setStatus(PaymentStatus.REFUNDED);
+        Payment updatedPayment = paymentRepository.save(payment);
+        
+        return convertToResponse(updatedPayment);
+    }
+    
+    private PaymentResponse convertToResponse(Payment payment) {
+        return new PaymentResponse(
+                payment.getId(),
+                payment.getPaymentId(),
+                payment.getOrderId(),
+                payment.getAmount(),
+                payment.getStatus(),
+                payment.getMethod(),
+                payment.getTransactionId(),
+                payment.getCreatedAt(),
+                payment.getUpdatedAt()
+        );
+    }
+}
