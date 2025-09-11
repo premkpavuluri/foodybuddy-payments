@@ -11,6 +11,15 @@ java {
     sourceCompatibility = '17'
 }
 
+jar {
+    enabled = false
+}
+
+bootJar {
+    archiveBaseName = 'foodybuddy-payments'
+    archiveVersion = '0.0.1-SNAPSHOT'
+}
+
 repositories {
     mavenCentral()
 }

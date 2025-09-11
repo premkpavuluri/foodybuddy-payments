@@ -29,3 +29,13 @@ management:
 logging:
   level:
     com.foodybuddy.payments: DEBUG
+
+# Payment processing configuration
+payment:
+  processing:
+    timeout: 30000  # 30 seconds
+    retry-attempts: 3
+    success-rate: 0.9  # 90% success rate for simulation
+  simulation:
+    enabled: true
+    processing-delay: 2000  # 2 seconds delay

@@ -15,8 +15,11 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class PaymentController {
     
-    @Autowired
-    private PaymentService paymentService;
+    private final PaymentService paymentService;
+
+    public PaymentController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
     
     @PostMapping("/process")
     public ResponseEntity<PaymentResponse> processPayment(@RequestBody ProcessPaymentRequest request) {

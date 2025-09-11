@@ -1,5 +1,6 @@
 package com.foodybuddy.payments.service;
 
+import com.foodybuddy.payments.config.PaymentConfig;
 import com.foodybuddy.payments.dto.PaymentResponse;
 import com.foodybuddy.payments.dto.ProcessPaymentRequest;
 import com.foodybuddy.payments.entity.Payment;
@@ -14,12 +15,30 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Payment Service
+ * 
+ * This service handles all payment-related operations in the FoodyBuddy application.
+ * It processes payments, manages payment status, and handles refunds.
+ * 
+ * Key responsibilities:
+ * - Process payments for orders
+ * - Simulate payment gateway interactions
+ * - Track payment status and transaction details
+ * - Handle payment refunds
+ * - Provide payment history and details
+ */
 @Service
 @Transactional
 public class PaymentService {
     
-    @Autowired
-    private PaymentRepository paymentRepository;
+    private final PaymentRepository paymentRepository;
+    private final PaymentConfig paymentConfig;
+
+    public PaymentService(PaymentRepository paymentRepository, PaymentConfig paymentConfig) {
+        this.paymentRepository = paymentRepository;
+        this.paymentConfig = paymentConfig;
+    }
     
     public PaymentResponse processPayment(ProcessPaymentRequest request) {
         String paymentId = UUID.randomUUID().toString();
@@ -38,14 +57,19 @@ public class PaymentService {
         
         // Simulate payment processing
         try {
-            // In a real application, this would call a payment gateway
-            Thread.sleep(2000); // Simulate processing time
-            
-            // Simulate success/failure (90% success rate)
-            if (Math.random() > 0.1) {
-                payment.setStatus(PaymentStatus.COMPLETED);
+            if (paymentConfig.getSimulation().isEnabled()) {
+                // In a real application, this would call a payment gateway
+                Thread.sleep(paymentConfig.getSimulation().getProcessingDelay());
+                
+                // Simulate success/failure based on configured success rate
+                if (Math.random() > (1 - paymentConfig.getProcessing().getSuccessRate())) {
+                    payment.setStatus(PaymentStatus.COMPLETED);
+                } else {
+                    payment.setStatus(PaymentStatus.FAILED);
+                }
             } else {
-                payment.setStatus(PaymentStatus.FAILED);
+                // Real payment processing would go here
+                payment.setStatus(PaymentStatus.COMPLETED);
             }
         } catch (InterruptedException e) {
             payment.setStatus(PaymentStatus.FAILED);
