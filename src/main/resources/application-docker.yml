@@ -5,7 +5,7 @@ spring:
   application:
     name: foodybuddy-payments
   datasource:
-    url: jdbc:postgresql://postgres:5432/foodybuddy?currentSchema=payments
+    url: jdbc:postgresql://postgres-db-service:5432/foodybuddy?currentSchema=payments
     driverClassName: org.postgresql.Driver
     username: foodybuddy_user
     password: foodybuddy_password
