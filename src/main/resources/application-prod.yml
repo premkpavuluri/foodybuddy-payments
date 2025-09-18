@@ -5,14 +5,14 @@ spring:
   application:
     name: foodybuddy-payments
   datasource:
-    url: jdbc:postgresql://postgres:5432/foodybuddy?currentSchema=payments
+    url: jdbc:postgresql://postgres-db-service:5432/foodybuddy?currentSchema=payments
     driverClassName: org.postgresql.Driver
     username: foodybuddy_user
     password: foodybuddy_password
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: validate
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -25,11 +25,13 @@ management:
         include: health,info
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized
 
 logging:
   level:
-    com.foodybuddy.payments: DEBUG
+    com.foodybuddy.payments: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
 # Payment processing configuration
 payment:
