@@ -5,14 +5,14 @@ spring:
   application:
     name: foodybuddy-payments
   datasource:
-    url: jdbc:postgresql://postgres:5432/foodybuddy?currentSchema=payments
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:foodybuddy}?currentSchema=${DB_SCHEMA_PAYMENTS:payments}
     driverClassName: org.postgresql.Driver
-    username: foodybuddy_user
-    password: foodybuddy_password
+    username: ${DB_USERNAME:foodybuddy_user}
+    password: ${DB_PASSWORD:foodybuddy_password}
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: ${JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: ${JPA_SHOW_SQL:true}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -29,14 +29,14 @@ management:
 
 logging:
   level:
-    com.foodybuddy.payments: DEBUG
+    com.foodybuddy.payments: ${LOG_LEVEL_PAYMENTS:DEBUG}
 
 # Payment processing configuration
 payment:
   processing:
-    timeout: 30000  # 30 seconds
-    retry-attempts: 3
-    success-rate: 0.9  # 90% success rate for simulation
+    timeout: ${PAYMENT_TIMEOUT:30000}  # 30 seconds
+    retry-attempts: ${PAYMENT_RETRY_ATTEMPTS:3}
+    success-rate: ${PAYMENT_SUCCESS_RATE:0.9}  # 90% success rate for simulation
   simulation:
-    enabled: true
-    processing-delay: 2000  # 2 seconds delay
+    enabled: ${PAYMENT_SIMULATION_ENABLED:true}
+    processing-delay: ${PAYMENT_PROCESSING_DELAY:2000}  # 2 seconds delay
